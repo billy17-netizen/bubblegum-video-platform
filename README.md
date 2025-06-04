@@ -84,7 +84,7 @@ Copy `env.example` to `.env` and configure the following:
 
 - Next.js
 - React
-- Prisma (SQLite)
+- Postgresql
 - NextAuth.js
 - TailwindCSS
 - Framer Motion

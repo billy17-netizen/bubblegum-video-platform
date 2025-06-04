@@ -20,7 +20,8 @@ export const authOptions: NextAuthOptions = {
           username: credentials?.username,
           isAdmin: credentials?.isAdmin,
           hasCode: !!credentials?.code,
-          hasPassword: !!credentials?.password
+          hasPassword: !!credentials?.password,
+          allCredentials: credentials
         });
 
         if (!credentials?.username) {
@@ -34,28 +35,37 @@ export const authOptions: NextAuthOptions = {
         if (isAdmin) {
           // Admin authentication
           console.log(`[Auth] Looking for admin: ${credentials.username}`);
-          const admin = await prisma.admin.findUnique({
-            where: { username: credentials.username },
-          });
+          try {
+            const admin = await prisma.admin.findUnique({
+              where: { username: credentials.username },
+            });
+            
+            console.log(`[Auth] Admin query result:`, admin ? 'Found' : 'Not found');
 
-          if (!admin || !credentials.password) {
-            console.log(`[Auth] Admin not found or no password provided`);
-            throw new Error("Invalid credentials");
+            if (!admin || !credentials.password) {
+              console.log(`[Auth] Admin not found or no password provided`);
+              throw new Error("Invalid credentials");
+            }
+
+            console.log(`[Auth] Comparing passwords...`);
+            const isValid = await bcrypt.compare(credentials.password, admin.password);
+            console.log(`[Auth] Password comparison result:`, isValid);
+
+            if (!isValid) {
+              console.log(`[Auth] Invalid admin password`);
+              throw new Error("Invalid credentials");
+            }
+
+            console.log(`[Auth] Admin login successful: ${admin.username}`);
+            return {
+              id: admin.id,
+              username: admin.username,
+              role: "ADMIN",
+            };
+          } catch (dbError) {
+            console.error(`[Auth] Database error:`, dbError);
+            throw new Error("Database connection failed");
           }
-
-          const isValid = await bcrypt.compare(credentials.password, admin.password);
-
-          if (!isValid) {
-            console.log(`[Auth] Invalid admin password`);
-            throw new Error("Invalid credentials");
-          }
-
-          console.log(`[Auth] Admin login successful: ${admin.username}`);
-          return {
-            id: admin.id,
-            username: admin.username,
-            role: "ADMIN",
-          };
         } else {
           // User authentication with auth code
           if (!credentials.code) {
