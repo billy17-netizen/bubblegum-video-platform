@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline - Bubblegum Videos</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .offline-container {
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px 30px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .offline-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+    }
+    
+    .offline-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .offline-message {
+      color: #d1d5db;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+    
+    .retry-button {
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    
+    .retry-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(236, 72, 153, 0.3);
+    }
+    
+    .offline-features {
+      margin-top: 30px;
+      text-align: left;
+    }
+    
+    .offline-features h3 {
+      color: #f3f4f6;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    
+    .feature-list {
+      list-style: none;
+    }
+    
+    .feature-list li {
+      color: #d1d5db;
+      padding: 8px 0;
+      padding-left: 24px;
+      position: relative;
+    }
+    
+    .feature-list li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #10b981;
+      font-weight: bold;
+    }
+    
+    .connection-status {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      font-size: 14px;
+    }
+    
+    .connection-status.online {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #86efac;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    .checking {
+      animation: pulse 2s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-icon">📱</div>
+    
+    <h1 class="offline-title">You're Offline</h1>
+    
+    <p class="offline-message">
+      It looks like you've lost your internet connection. Don't worry, some features are still available!
+    </p>
+    
+    <button class="retry-button" onclick="checkConnection()">
+      Check Connection
+    </button>
+    
+    <div class="connection-status" id="connectionStatus">
+      No internet connection detected
+    </div>
+    
+    <div class="offline-features">
+      <h3>Available Offline:</h3>
+      <ul class="feature-list">
+        <li>Previously viewed videos (cached)</li>
+        <li>Browse your viewing history</li>
+        <li>App settings and preferences</li>
+        <li>Saved video thumbnails</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Check connection status
+    function updateConnectionStatus() {
+      const statusElement = document.getElementById('connectionStatus');
+      const retryButton = document.querySelector('.retry-button');
+      
+      if (navigator.onLine) {
+        statusElement.textContent = 'Connection restored! Refreshing...';
+        statusElement.className = 'connection-status online';
+        
+        // Automatically refresh when connection is restored
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        statusElement.textContent = 'No internet connection detected';
+        statusElement.className = 'connection-status';
+      }
+    }
+    
+    // Check connection manually
+    function checkConnection() {
+      const statusElement = document.getElementById('connectionStatus');
+      const retryButton = document.querySelector('.retry-button');
+      
+      statusElement.textContent = 'Checking connection...';
+      statusElement.className = 'connection-status checking';
+      retryButton.disabled = true;
+      
+      // Try to fetch a small resource to test connection
+      fetch('/favicon.ico', { 
+        method: 'HEAD',
+        cache: 'no-cache',
+        mode: 'no-cors'
+      })
+      .then(() => {
+        statusElement.textContent = 'Connection restored! Redirecting...';
+        statusElement.className = 'connection-status online';
+        
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1000);
+      })
+      .catch(() => {
+        statusElement.textContent = 'Still offline. Please check your connection.';
+        statusElement.className = 'connection-status';
+        retryButton.disabled = false;
+      });
+    }
+    
+    // Listen for online/offline events
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    
+    // Initial status check
+    updateConnectionStatus();
+    
+    // Periodic connection check
+    setInterval(updateConnectionStatus, 30000); // Check every 30 seconds
+  </script>
+</body>
+</html> 

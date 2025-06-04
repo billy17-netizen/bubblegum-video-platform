@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate PWA Icons</title>
+</head>
+<body>
+    <canvas id="canvas" style="border: 1px solid #000;"></canvas>
+    <div id="download-links"></div>
+
+    <script>
+        const svgString = `<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="bubble-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <circle cx="256" cy="256" r="240" fill="url(#bg-gradient)" stroke="#ffffff" stroke-width="8"/>
+            <circle cx="256" cy="220" r="80" fill="url(#bubble-gradient)" stroke="#ffffff" stroke-width="4"/>
+            <circle cx="180" cy="280" r="30" fill="#fbbf24" opacity="0.8"/>
+            <circle cx="320" cy="300" r="25" fill="#f59e0b" opacity="0.8"/>
+            <circle cx="200" cy="350" r="20" fill="#fde047" opacity="0.7"/>
+            <circle cx="340" cy="260" r="18" fill="#facc15" opacity="0.7"/>
+            <circle cx="256" cy="220" r="35" fill="rgba(255,255,255,0.9)"/>
+            <polygon points="245,205 245,235 275,220" fill="#ec4899"/>
+            <text x="256" y="420" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="#ffffff">B</text>
+        </svg>`;
+
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const downloadLinks = document.getElementById('download-links');
+
+        function generateIcon(size) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(svgBlob);
+                
+                img.onload = function() {
+                    canvas.width = size;
+                    canvas.height = size;
+                    ctx.clearRect(0, 0, size, size);
+                    ctx.drawImage(img, 0, 0, size, size);
+                    
+                    canvas.toBlob(function(blob) {
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = `icon-${size}x${size}.png`;
+                        link.textContent = `Download ${size}x${size} icon`;
+                        link.style.display = 'block';
+                        link.style.margin = '5px 0';
+                        downloadLinks.appendChild(link);
+                        
+                        URL.revokeObjectURL(url);
+                        resolve();
+                    }, 'image/png');
+                };
+                
+                img.src = url;
+            });
+        }
+
+        async function generateAllIcons() {
+            for (const size of sizes) {
+                await generateIcon(size);
+            }
+            console.log('All icons generated!');
+        }
+
+        generateAllIcons();
+    </script>
+</body>
+</html> 

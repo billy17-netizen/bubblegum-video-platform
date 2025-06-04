@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Next.js
+.next/
+out/
+dist/
+
+# Production
+build/
+
+# Misc
+.DS_Store
+*.log
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Cache directories
+.npm
+.eslintcache
+.parcel-cache
+
+# Temporary folders
+tmp/
+temp/
+
+# Generated files
+src/generated/
+
+# Video processing
+ffmpeg-bin/
+ffmpeg-temp/
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Large files
+*.zip
+*.tar.gz
+
+# Logs
+logs/
+*.log
+
+# Database
+*.db
+*.sqlite
+
+# Prisma
+prisma/migrations/
+
+# OS generated files
+Thumbs.db
+.DS_Store
+
+.git
+.env*
+public/thumbnails
+public/videos
+*.min.js
+scripts/
+.vscode/
+.idea/ 

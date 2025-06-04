@@ -32,6 +32,35 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!env.example
+
+# Sensitive files and folders
+/logs/
+/temp/
+*.log
+*.key
+*.pem
+*.p12
+*.pfx
+*config*.json
+deploy-*.sh
+production-*.md
+*production*
+*deployment*
+
+# Large binary files
+/ffmpeg-bin/
+*.exe
+*.dll
+
+# Database files
+prisma/dev.db*
+*.db
+*.db-journal
+
+# Upload files
+/public/thumbnails/
+/public/uploads/
 
 # vercel
 .vercel
@@ -39,3 +68,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma

@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  videos    Video[]
+  authCodes AuthCode[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id        String      @id @default(uuid())
+  username  String      @unique
+  bio       String?
+  image     String?
+  authCode  AuthCode    @relation(fields: [authCodeId], references: [id])
+  authCodeId String     @unique
+  videoLikes VideoLike[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model AuthCode {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  isUsed    Boolean  @default(false)
+  user      User?
+  admin     Admin    @relation(fields: [adminId], references: [id])
+  adminId   String
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+}
+
+model Video {
+  id              String      @id @default(uuid())
+  title           String
+  description     String?
+  filePath        String      // Keep for backward compatibility
+  thumbnail       String?     // Keep for backward compatibility
+  
+  // Cloudinary Integration Fields
+  cloudinaryPublicId    String?   // Cloudinary public_id for the video
+  cloudinaryUrl         String?   // Cloudinary secure_url for the video
+  thumbnailPublicId     String?   // Cloudinary public_id for thumbnail
+  thumbnailUrl          String?   // Cloudinary secure_url for thumbnail
+  
+  // Bunny.net Integration Fields
+  bunnyVideoId          String?   // Bunny.net video ID
+  bunnyStreamUrl        String?   // Bunny.net streaming URL
+  bunnyThumbnailUrl     String?   // Bunny.net thumbnail URL
+  
+  // Google Drive Integration Fields
+  googleDriveFileId     String?   // Google Drive file ID for the video
+  googleDriveVideoUrl   String?   // Google Drive direct/streamable URL for the video
+  googleDriveThumbnailId String?  // Google Drive file ID for thumbnail
+  googleDriveThumbnailUrl String? // Google Drive direct URL for thumbnail
+  
+  // Storage Type (for better organization)
+  storageType     String?     // 'local', 'cloudinary', 'bunny', 'googledrive'
+  
+  // Duplicate Prevention Fields
+  fileHash        String?     // SHA256 hash of the video file for duplicate detection
+  fileSize        BigInt?     // File size in bytes
+  originalFileName String?    // Original filename when uploaded
+  
+  admin           Admin       @relation(fields: [adminId], references: [id])
+  adminId         String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  likes           Int         @default(0)
+  views           Int         @default(0)
+  userLikes       VideoLike[]
+}
+
+model VideoLike {
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  videoId String
+  createdAt DateTime @default(now())
+
+  @@id([userId, videoId])
+  @@index([videoId])
+  @@index([userId])
+  @@map("video_likes")
+}
